@@ -8,15 +8,24 @@ bool EpaperWaveshare::initialise(bool partial) {
   EPaperBase::initialise(partial);
   if (partial) {
     this->cmd_data(0x32, this->partial_lut_, this->partial_lut_length_);
+    this->send_init_sequence_(this->partial_sequence_, this->partial_sequence_length_);
     this->cmd_data(0x3C, {0x80});
     this->cmd_data(0x22, {0xC0});
     this->command(0x20);
     this->next_delay_ = 100;
   } else {
     this->cmd_data(0x32, this->lut_, this->lut_length_);
+    this->send_init_sequence_(this->full_sequence_, this->full_sequence_length_);
     this->cmd_data(0x3C, {0x05});
   }
-  this->send_red_ = true;
+  if (this->base_image_required_) {
+    // The previous image must stay in the base RAM for partial updates to compare against,
+    // so it is written there on full updates only.
+    this->send_red_ = !partial;
+    this->send_red_as_image_ = true;
+  } else {
+    this->send_red_ = true;
+  }
   return true;
 }
 

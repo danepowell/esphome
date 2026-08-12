@@ -10,12 +10,19 @@ class EpaperWaveshare final : public EPaperMono {
  public:
   EpaperWaveshare(const char *name, uint16_t width, uint16_t height, const uint8_t *init_sequence,
                   size_t init_sequence_length, const uint8_t *lut, size_t lut_length, const uint8_t *partial_lut,
-                  uint16_t partial_lut_length)
+                  uint16_t partial_lut_length, const uint8_t *full_sequence = nullptr, size_t full_sequence_length = 0,
+                  const uint8_t *partial_sequence = nullptr, size_t partial_sequence_length = 0,
+                  bool base_image_required = false)
       : EPaperMono(name, width, height, init_sequence, init_sequence_length),
         lut_(lut),
         lut_length_(lut_length),
         partial_lut_(partial_lut),
-        partial_lut_length_(partial_lut_length) {}
+        partial_lut_length_(partial_lut_length),
+        full_sequence_(full_sequence),
+        full_sequence_length_(full_sequence_length),
+        partial_sequence_(partial_sequence),
+        partial_sequence_length_(partial_sequence_length),
+        base_image_required_(base_image_required) {}
 
  protected:
   bool initialise(bool partial) override;
@@ -26,5 +33,11 @@ class EpaperWaveshare final : public EPaperMono {
   size_t lut_length_;
   const uint8_t *partial_lut_;
   uint16_t partial_lut_length_;
+  // Commands sent after the LUT, e.g. voltage settings that differ between full and partial updates.
+  const uint8_t *full_sequence_;
+  size_t full_sequence_length_;
+  const uint8_t *partial_sequence_;
+  size_t partial_sequence_length_;
+  bool base_image_required_;
 };
 }  // namespace esphome::epaper_spi
