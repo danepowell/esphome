@@ -63,17 +63,17 @@ void ICNT86Touchscreen::reset_() {
 }
 
 void ICNT86Touchscreen::add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_raw, int16_t z_raw) {
-  TouchPoint tp;
+  esphome::touchscreen::TouchPoint tp;
   uint16_t x, y;
   if (this->swap_x_y_) {
     std::swap(x_raw, y_raw);
   }
   if (!this->touches_.contains(id)) {
-    tp.state = STATE_PRESSED;
+    tp.state = esphome::touchscreen::STATE_PRESSED;
     tp.id = id;
   } else {
     tp = this->touches_[id];
-    tp.state = STATE_UPDATED;
+    tp.state = esphome::touchscreen::STATE_UPDATED;
     tp.y_prev = tp.y;
     tp.x_prev = tp.x;
   }
@@ -86,9 +86,9 @@ void ICNT86Touchscreen::add_raw_touch_position_(uint8_t id, int16_t x_raw, int16
     tp.x = x;
     tp.y = y;
   } else {
-    tp.state |= STATE_CALIBRATE;
+    tp.state |= esphome::touchscreen::STATE_CALIBRATE;
   }
-  if (tp.state == STATE_PRESSED) {
+  if (tp.state == esphome::touchscreen::STATE_PRESSED) {
     tp.x_org = tp.x;
     tp.y_org = tp.y;
   }
