@@ -23,6 +23,8 @@ class ICNT86Touchscreen : public touchscreen::Touchscreen, public i2c::I2CDevice
   void icnt_write_(uint16_t reg, char const *data, uint8_t len);
   void i2c_write_byte_(uint16_t reg, char const *data, uint8_t len);
   void reset_touch_sensor_();
+  void add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_raw, int16_t z_raw = 0);
+  int16_t normalize_(int16_t val, int16_t min_val, int16_t max_val, bool inverted = false);
   InternalGPIOPin *interrupt_pin_{};
   GPIOPin *reset_pin_{nullptr};
 };

@@ -22,7 +22,6 @@ void ICNT86Touchscreen::setup() {
   this->x_raw_max_ = this->display_->get_native_width();
   this->y_raw_max_ = this->display_->get_native_height();
 
-  this->conversion_to_resolution_ = false;
   // Trigger initial read to activate the interrupt
   this->store_.touched = true;
 }
@@ -61,6 +60,66 @@ void ICNT86Touchscreen::reset_() {
     this->reset_pin_->digital_write(true);
     delay(10);
   }
+}
+
+void Touchscreen::add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_raw, int16_t z_raw) {
+  TouchPoint tp;
+  uint16_t x, y;
+  if (this->swap_x_y_) {
+    std::swap(x_raw, y_raw);
+  }
+  if (!this->touches_.contains(id)) {
+    tp.state = STATE_PRESSED;
+    tp.id = id;
+  } else {
+    tp = this->touches_[id];
+    tp.state = STATE_UPDATED;
+    tp.y_prev = tp.y;
+    tp.x_prev = tp.x;
+  }
+  tp.x_raw = x_raw;
+  tp.y_raw = y_raw;
+  tp.z_raw = z_raw;
+  if (this->x_raw_max_ != this->x_raw_min_ and this->y_raw_max_ != this->y_raw_min_) {
+    x = this->normalize_(x_raw, this->x_raw_min_, this->x_raw_max_, this->invert_x_);
+    y = this->normalize_(y_raw, this->y_raw_min_, this->y_raw_max_, this->invert_y_);
+    tp.x = x;
+    tp.y = y;
+  } else {
+    tp.state |= STATE_CALIBRATE;
+  }
+  if (tp.state == STATE_PRESSED) {
+    tp.x_org = tp.x;
+    tp.y_org = tp.y;
+  }
+
+  this->touches_[id] = tp;
+
+  this->is_touched_ = true;
+
+  if ((tp.x != tp.x_prev) || (tp.y != tp.y_prev)) {
+    this->need_update_ = true;
+  }
+}
+
+int16_t Touchscreen::normalize_(int16_t val, int16_t min_val, int16_t max_val, bool inverted) {
+  int16_t ret;
+
+  // only normalize when min and max value are specified
+  if (min_val && max_val) {
+    if (val <= min_val) {
+      ret = 0;
+    } else if (val >= max_val) {
+      ret = 0xfff;
+    } else {
+      ret = (int16_t) ((int) 0xfff * (val - min_val) / (max_val - min_val));
+    }
+  } else {
+    ret = val;
+  }
+  ret = (inverted) ? 0xfff - ret : ret;
+
+  return ret;
 }
 
 void ICNT86Touchscreen::i2c_write_byte_(uint16_t reg, char const *data, uint8_t len) {
