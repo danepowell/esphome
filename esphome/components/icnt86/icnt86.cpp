@@ -21,23 +21,20 @@ void ICNT86Touchscreen::setup() {
 
   this->x_raw_max_ = this->display_->get_native_width();
   this->y_raw_max_ = this->display_->get_native_height();
-
-  // Trigger initial read to activate the interrupt
-  this->store_.touched = true;
 }
 
 void ICNT86Touchscreen::update_touches() {
   char buf[100] = {0};
   char mask[1] = {0x00};
 
-  this->icnt_read_(0x1001, buf, 1);
+  this->i2c_read_byte_(0x1001, buf, 1);
   uint8_t touch_count = buf[0];
 
   if (touch_count == 0x00 || (touch_count > 5 || touch_count < 1)) {  // No new touch
     return;
   } else {
-    this->icnt_read_(0x1002, buf, touch_count * 7);
-    this->icnt_write_(0x1001, mask, 1);
+    this->i2c_read_byte_(0x1002, buf, touch_count * 7);
+    this->i2c_write_byte_(0x1001, mask, 1);
     ESP_LOGD(TAG, "Touch count: %d", touch_count);
 
     for (uint8_t i = 0; i < touch_count; i++) {
@@ -137,13 +134,6 @@ void ICNT86Touchscreen::dump_config() {
   LOG_PIN("  Reset Pin: ", this->reset_pin_);
 }
 
-void ICNT86Touchscreen::icnt_read_(uint16_t reg, char const *data, uint8_t len) {
-  this->i2c_read_byte_(reg, data, len);
-}
-
-void ICNT86Touchscreen::icnt_write_(uint16_t reg, char const *data, uint8_t len) {
-  this->i2c_write_byte_(reg, data, len);
-}
 void ICNT86Touchscreen::i2c_read_byte_(uint16_t reg, char const *data, uint8_t len) {
   this->i2c_write_byte_(reg, nullptr, 0);
   this->read((uint8_t *) data, len);

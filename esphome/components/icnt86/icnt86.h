@@ -19,8 +19,6 @@ class ICNT86Touchscreen : public touchscreen::Touchscreen, public i2c::I2CDevice
   void update_touches() override;
   void reset_();
   void i2c_read_byte_(uint16_t reg, char const *data, uint8_t len);
-  void icnt_read_(uint16_t reg, char const *data, uint8_t len);
-  void icnt_write_(uint16_t reg, char const *data, uint8_t len);
   void i2c_write_byte_(uint16_t reg, char const *data, uint8_t len);
   void reset_touch_sensor_();
   void add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_raw, int16_t z_raw = 0);
