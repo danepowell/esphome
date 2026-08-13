@@ -1,13 +1,12 @@
 #include "icnt86.h"
 #include "esphome/core/log.h"
 
-namespace esphome {
-namespace icnt86 {
+namespace esphome::icnt86 {
 
 static const char *const TAG = "icnt86";
 
 void ICNT86Touchscreen::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up icnt86 touchscreen");
+  ESP_LOGCONFIG(TAG, "Setting up icnt86 Touchscreen...");
 
   // Register interrupt pin
   this->interrupt_pin_->pin_mode(gpio::FLAG_INPUT | gpio::FLAG_PULLUP);
@@ -20,15 +19,12 @@ void ICNT86Touchscreen::setup() {
     this->reset_();
   }
 
-  this->x_raw_max_ = this->display_->get_native_height();
-  this->y_raw_max_ = this->display_->get_native_width();
-
-  // Trigger initial read to activate the interrupt
-  this->store_.touched = true;
+  this->x_raw_max_ = this->display_->get_native_width();
+  this->y_raw_max_ = this->display_->get_native_height();
 }
 
 void ICNT86Touchscreen::update_touches() {
-  char buf[100];
+  char buf[100] = {0};
   char mask[1] = {0x00};
 
   this->icnt_read_(0x1001, buf, 1);
@@ -99,5 +95,4 @@ void ICNT86Touchscreen::i2c_read_byte_(uint16_t reg, char const *data, uint8_t l
   this->read((uint8_t *) data, len);
 }
 
-}  // namespace icnt86
-}  // namespace esphome
+}  // namespace esphome::icnt86

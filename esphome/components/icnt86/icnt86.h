@@ -5,8 +5,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/hal.h"
 
-namespace esphome {
-namespace icnt86 {
+namespace esphome::icnt86 {
 
 class ICNT86Touchscreen : public touchscreen::Touchscreen, public i2c::I2CDevice {
  public:
@@ -32,5 +31,4 @@ class ICNT86Touchscreen : public touchscreen::Touchscreen, public i2c::I2CDevice
   bool p_old_zero_ = false;
 };
 
-}  // namespace icnt86
-}  // namespace esphome
+}  // namespace esphome::icnt86
