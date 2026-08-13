@@ -5,6 +5,11 @@ namespace esphome::icnt86 {
 
 static const char *const TAG = "icnt86";
 
+static const uint16_t REG_TOUCH_STATUS = 0x1001;
+static const uint16_t REG_TOUCH_DATA = 0x1002;
+static const uint8_t MAX_TOUCHES = 5;
+static const uint8_t TOUCH_DATA_LEN = 7;
+
 void ICNT86Touchscreen::setup() {
   ESP_LOGCONFIG(TAG, "Setting up icnt86 Touchscreen...");
 
@@ -27,28 +32,30 @@ void ICNT86Touchscreen::setup() {
 }
 
 void ICNT86Touchscreen::update_touches() {
-  char buf[100] = {0};
+  char buf[MAX_TOUCHES * TOUCH_DATA_LEN] = {0};
   char mask[1] = {0x00};
 
-  this->icnt_read_(0x1001, buf, 1);
-  uint8_t touch_count = buf[0];
+  this->icnt_read_(REG_TOUCH_STATUS, buf, 1);
+  uint8_t touch_count = (uint8_t) buf[0];
 
-  if (touch_count == 0x00 || (touch_count > 5 || touch_count < 1)) {  // No new touch
-    return;
-  } else {
-    this->icnt_read_(0x1002, buf, touch_count * 7);
-    this->icnt_write_(0x1001, mask, 1);
+  if (touch_count > 0 && touch_count <= MAX_TOUCHES) {
+    this->icnt_read_(REG_TOUCH_DATA, buf, touch_count * TOUCH_DATA_LEN);
     ESP_LOGV(TAG, "Touch count: %d", touch_count);
 
     for (uint8_t i = 0; i < touch_count; i++) {
-      // buf is char (signed on this platform), so each byte must be cast before combining
-      uint16_t x = ((uint16_t) (uint8_t) buf[2 + 7 * i] << 8) + (uint8_t) buf[1 + 7 * i];
-      uint16_t y = ((uint16_t) (uint8_t) buf[4 + 7 * i] << 8) + (uint8_t) buf[3 + 7 * i];
-      uint16_t p = (uint8_t) buf[5 + 7 * i];
-      uint16_t touch_evenid = (uint8_t) buf[6 + 7 * i];
-      this->add_raw_touch_position_(touch_evenid, x, y, p);
+      const char *point = buf + i * TOUCH_DATA_LEN;
+      // buf is char, which is signed on this platform, so each byte must be cast before combining
+      uint16_t x = ((uint16_t) (uint8_t) point[2] << 8) + (uint8_t) point[1];
+      uint16_t y = ((uint16_t) (uint8_t) point[4] << 8) + (uint8_t) point[3];
+      uint16_t p = (uint8_t) point[5];
+      uint8_t id = (uint8_t) point[6];
+      this->add_raw_touch_position_(id, x, y, p);
     }
   }
+
+  // The status register must always be cleared, otherwise the controller keeps the interrupt line
+  // asserted and no further edges are generated.
+  this->icnt_write_(REG_TOUCH_STATUS, mask, 1);
 }
 
 void ICNT86Touchscreen::reset_() {
