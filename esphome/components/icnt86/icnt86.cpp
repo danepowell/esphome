@@ -38,17 +38,15 @@ void ICNT86Touchscreen::update_touches() {
   } else {
     this->icnt_read_(0x1002, buf, touch_count * 7);
     this->icnt_write_(0x1001, mask, 1);
-    ESP_LOGD(TAG, "Touch count: %d", touch_count);
+    ESP_LOGV(TAG, "Touch count: %d", touch_count);
 
     for (uint8_t i = 0; i < touch_count; i++) {
-      uint16_t x = ((uint16_t) buf[2 + 7 * i] << 8) + buf[1 + 7 * i];
-      uint16_t y = ((uint16_t) buf[4 + 7 * i] << 8) + buf[3 + 7 * i];
-      uint16_t p = buf[5 + 7 * i];
-      uint16_t touch_evenid = buf[6 + 7 * i];
-      if (!this->touches_.contains(touch_evenid) ||
-          (x != this->touches_[touch_evenid].x_prev && y != this->touches_[touch_evenid].y_prev)) {
-        this->add_raw_touch_position_(touch_evenid, x, y, p);
-      }
+      // buf is char (signed on this platform), so each byte must be cast before combining
+      uint16_t x = ((uint16_t) (uint8_t) buf[2 + 7 * i] << 8) + (uint8_t) buf[1 + 7 * i];
+      uint16_t y = ((uint16_t) (uint8_t) buf[4 + 7 * i] << 8) + (uint8_t) buf[3 + 7 * i];
+      uint16_t p = (uint8_t) buf[5 + 7 * i];
+      uint16_t touch_evenid = (uint8_t) buf[6 + 7 * i];
+      this->add_raw_touch_position_(touch_evenid, x, y, p);
     }
   }
 }
