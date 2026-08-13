@@ -19,8 +19,8 @@ void ICNT86Touchscreen::setup() {
     this->reset_();
   }
 
-  this->x_raw_max_ = this->display_->get_native_width();
-  this->y_raw_max_ = this->display_->get_native_height();
+  this->x_raw_max_ = this->display_->get_native_height();
+  this->y_raw_max_ = this->display_->get_native_width();
 }
 
 void ICNT86Touchscreen::update_touches() {
