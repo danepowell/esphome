@@ -22,7 +22,6 @@ void ICNT86Touchscreen::setup() {
   this->x_raw_max_ = this->display_->get_native_width();
   this->y_raw_max_ = this->display_->get_native_height();
 
-  this->conversion_to_resolution_ = false;
   // Trigger initial read to activate the interrupt
   this->store_.touched = true;
 }
