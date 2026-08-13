@@ -62,7 +62,7 @@ void ICNT86Touchscreen::reset_() {
   }
 }
 
-void Touchscreen::add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_raw, int16_t z_raw) {
+void ICNT86Touchscreen::add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_raw, int16_t z_raw) {
   TouchPoint tp;
   uint16_t x, y;
   if (this->swap_x_y_) {
@@ -102,7 +102,7 @@ void Touchscreen::add_raw_touch_position_(uint8_t id, int16_t x_raw, int16_t y_r
   }
 }
 
-int16_t Touchscreen::normalize_(int16_t val, int16_t min_val, int16_t max_val, bool inverted) {
+int16_t ICNT86Touchscreen::normalize_(int16_t val, int16_t min_val, int16_t max_val, bool inverted) {
   int16_t ret;
 
   // only normalize when min and max value are specified
