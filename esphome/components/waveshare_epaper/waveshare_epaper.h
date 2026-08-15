@@ -167,7 +167,7 @@ class WaveshareEPaperTypeA : public WaveshareEPaper {
   WaveshareEPaperTypeAModel model_;
   uint32_t idle_timeout_() override;
 
-  bool deep_sleep_between_updates_{false};
+  bool deep_sleep_between_updates_{true};
 };
 
 enum WaveshareEPaperTypeBModel {
