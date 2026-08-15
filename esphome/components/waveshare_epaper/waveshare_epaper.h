@@ -434,6 +434,7 @@ class WaveshareEPaper2P9InV2R2 : public WaveshareEPaper {
 
   uint32_t full_update_every_{30};
   uint32_t at_update_{0};
+  bool deep_sleep_between_updates_{true};
 
  private:
   void reset_();
