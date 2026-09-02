@@ -1,5 +1,4 @@
 import esphome.codegen as cg
-from esphome.components.mipi import flatten_sequence
 from esphome.core import ID
 
 from ..display import CONF_INIT_SEQUENCE_ID
@@ -7,45 +6,31 @@ from . import EpaperModel
 
 
 class WaveshareModel(EpaperModel):
-    def __init__(
-        self,
-        name,
-        lut,
-        lut_partial=None,
-        sequence_full=(),
-        sequence_partial=(),
-        base_image_required=False,
-        **defaults,
-    ):
+    def __init__(self, name, lut, lut_partial=None, **defaults):
         super().__init__(name, "EpaperWaveshare", **defaults)
         self.lut = lut
         self.lut_partial = lut_partial
-        self.sequence_full = sequence_full
-        self.sequence_partial = sequence_partial
-        self.base_image_required = base_image_required
-
-    def _array_arg(self, config, suffix, data) -> tuple:
-        if not data:
-            return cg.nullptr, 0
-        return (
-            cg.static_const_array(
-                ID(config[CONF_INIT_SEQUENCE_ID].id + suffix, type=cg.uint8), data
-            ),
-            len(data),
-        )
 
     def get_constructor_args(self, config) -> tuple:
-        return (
-            *self._array_arg(config, "_lut", self.lut),
-            *self._array_arg(config, "_lut_partial", self.lut_partial),
-            *self._array_arg(
-                config, "_sequence_full", flatten_sequence(self.sequence_full)
+        lut = (
+            cg.static_const_array(
+                ID(config[CONF_INIT_SEQUENCE_ID].id + "_lut", type=cg.uint8), self.lut
             ),
-            *self._array_arg(
-                config, "_sequence_partial", flatten_sequence(self.sequence_partial)
-            ),
-            self.base_image_required,
+            len(self.lut),
         )
+        if self.lut_partial is None:
+            lut_partial = cg.nullptr, 0
+        else:
+            lut_partial = (
+                cg.static_const_array(
+                    ID(
+                        config[CONF_INIT_SEQUENCE_ID].id + "_lut_partial", type=cg.uint8
+                    ),
+                    self.lut_partial,
+                ),
+                len(self.lut_partial),
+            )
+        return *lut, *lut_partial
 
 
 # fmt: off
@@ -152,19 +137,5 @@ WaveshareModel(
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
         0x00, 0x00, 0x00,
-    ),
-    sequence_full=(
-        (0x3F, 0x22),  # option for LUT end
-        (0x03, 0x17),  # gate voltage
-        (0x04, 0x41, 0x00, 0x32),  # source voltage: VSH1, VSH2, VSL
-        (0x2C, 0x36),  # VCOM
-    ),
-    sequence_partial=(
-        (0x3F, 0x22),  # option for LUT end
-        (0x03, 0x17),  # gate voltage
-        (0x04, 0x41, 0xB0, 0x32),  # source voltage: VSH1, VSH2, VSL
-        (0x2C, 0x36),  # VCOM
-        (0x37, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00),
-    ),
-    base_image_required=True,
+    )
 )
