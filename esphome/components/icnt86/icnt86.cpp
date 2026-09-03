@@ -28,11 +28,18 @@ void ICNT86Touchscreen::setup() {
     }
   }
 
+  bool auto_calibrated = this->x_raw_max_ == this->x_raw_min_ || this->y_raw_max_ == this->y_raw_min_;
   if (this->x_raw_max_ == this->x_raw_min_) {
     this->x_raw_max_ = this->display_->get_native_width();
   }
   if (this->y_raw_max_ == this->y_raw_min_) {
     this->y_raw_max_ = this->display_->get_native_height();
+  }
+  // swap_x_y_ is applied to the raw reading before it's compared against x_raw_max_/y_raw_max_, so these
+  // auto-detected bounds must be swapped too, or the axis with the differing dimension will be clipped.
+  // Explicit user calibration is expected to already account for swap_xy, so it's left untouched.
+  if (auto_calibrated && this->swap_x_y_) {
+    std::swap(this->x_raw_max_, this->y_raw_max_);
   }
 }
 
