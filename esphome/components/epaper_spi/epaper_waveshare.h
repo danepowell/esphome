@@ -31,6 +31,9 @@ class EpaperWaveshare final : public EPaperMono {
   void set_window() override;
   void refresh_screen(bool partial) override;
   void deep_sleep() override;
+  bool reset() override;
+  // True while the base image in the controller RAM must be preserved for the next update.
+  bool must_keep_base_image_() const { return this->base_image_required_ && this->update_count_ != 0; }
   const uint8_t *lut_;
   size_t lut_length_;
   const uint8_t *partial_lut_;
