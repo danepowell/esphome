@@ -22,7 +22,9 @@ class EpaperWaveshare final : public EPaperMono {
         full_sequence_length_(full_sequence_length),
         partial_sequence_(partial_sequence),
         partial_sequence_length_(partial_sequence_length),
-        base_image_required_(base_image_required) {}
+        base_image_required_(base_image_required) {
+    this->send_red_as_image_ = base_image_required;
+  }
 
  protected:
   bool initialise(bool partial) override;
